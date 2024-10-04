@@ -1,21 +1,16 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <cjson/cJSON.h>
 
 #define TAMANHO 30
 
 void calcular_faturamento(double faturamento[], int tamanho) {
-    double soma = 0.0, menor = 0.0, maior = 0.0, media = 0.0;
+    double soma = 0.0, menor = -1.0, maior = 0.0, media = 0.0;
     int dias_validos = 0, dias_acima_media = 0;
 
     for (int i = 0; i < tamanho; i++) {
         if (faturamento[i] > 0) {
-            menor = faturamento[i];
-            break;
-        }
-    }
-
-    for (int i = 0; i < tamanho; i++) {
-        if (faturamento[i] > 0) {
-            if (faturamento[i] < menor) {
+            if (menor == -1.0 || faturamento[i] < menor) {
                 menor = faturamento[i];
             }
             if (faturamento[i] > maior) {
@@ -26,7 +21,9 @@ void calcular_faturamento(double faturamento[], int tamanho) {
         }
     }
 
-    media = soma / dias_validos;
+    if (dias_validos > 0) {
+        media = soma / dias_validos;
+    }
 
     for (int i = 0; i < tamanho; i++) {
         if (faturamento[i] > media) {
@@ -40,16 +37,35 @@ void calcular_faturamento(double faturamento[], int tamanho) {
 }
 
 int main() {
-    double faturamento[TAMANHO] = {
-        22100.00, 21450.00, 0.00, 24500.00, 0.00,
-        31000.00, 28900.00, 0.00, 0.00, 23000.00,
-        28000.00, 0.00, 30000.00, 0.00, 21000.00,
-        25500.00, 0.00, 27000.00, 0.00, 31000.00,
-        26000.00, 0.00, 22000.00, 23000.00, 0.00,
-        0.00, 31000.00, 27000.00, 26500.00, 32000.00
-    };
+    const char *faturamento_json = "{\"faturamento_diario\":[22100.00,21450.00,0.00,24500.00,0.00,"
+                                    "31000.00,28900.00,0.00,0.00,23000.00,"
+                                    "28000.00,0.00,30000.00,0.00,21000.00,"
+                                    "25500.00,0.00,27000.00,0.00,31000.00,"
+                                    "26000.00,0.00,22000.00,23000.00,0.00,"
+                                    "0.00,31000.00,27000.00,26500.00,32000.00]}";
+
+    cJSON *json = cJSON_Parse(faturamento_json);
+    if (json == NULL) {
+        fprintf(stderr, "Erro ao analisar JSON\n");
+        return 1;
+    }
+
+    cJSON *faturamento_array = cJSON_GetObjectItem(json, "faturamento_diario");
+    if (faturamento_array == NULL) {
+        fprintf(stderr, "Erro ao obter o array de faturamento\n");
+        cJSON_Delete(json);
+        return 1;
+    }
+
+    double faturamento[TAMANHO] = {0};
+
+    for (int i = 0; i < cJSON_GetArraySize(faturamento_array); i++) {
+        faturamento[i] = cJSON_GetArrayItem(faturamento_array, i)->valuedouble;
+    }
 
     calcular_faturamento(faturamento, TAMANHO);
+
+    cJSON_Delete(json);
 
     return 0;
 }
