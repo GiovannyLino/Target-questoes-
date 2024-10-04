@@ -1,0 +1,55 @@
+#include <stdio.h>
+
+#define TAMANHO 30
+
+void calcular_faturamento(double faturamento[], int tamanho) {
+    double soma = 0.0, menor = 0.0, maior = 0.0, media = 0.0;
+    int dias_validos = 0, dias_acima_media = 0;
+
+    for (int i = 0; i < tamanho; i++) {
+        if (faturamento[i] > 0) {
+            menor = faturamento[i];
+            break;
+        }
+    }
+
+    for (int i = 0; i < tamanho; i++) {
+        if (faturamento[i] > 0) {
+            if (faturamento[i] < menor) {
+                menor = faturamento[i];
+            }
+            if (faturamento[i] > maior) {
+                maior = faturamento[i];
+            }
+            soma += faturamento[i];
+            dias_validos++;
+        }
+    }
+
+    media = soma / dias_validos;
+
+    for (int i = 0; i < tamanho; i++) {
+        if (faturamento[i] > media) {
+            dias_acima_media++;
+        }
+    }
+
+    printf("Menor valor de faturamento: R$ %.2f\n", menor);
+    printf("Maior valor de faturamento: R$ %.2f\n", maior);
+    printf("Número de dias com faturamento acima da média: %d\n", dias_acima_media);
+}
+
+int main() {
+    double faturamento[TAMANHO] = {
+        22100.00, 21450.00, 0.00, 24500.00, 0.00,
+        31000.00, 28900.00, 0.00, 0.00, 23000.00,
+        28000.00, 0.00, 30000.00, 0.00, 21000.00,
+        25500.00, 0.00, 27000.00, 0.00, 31000.00,
+        26000.00, 0.00, 22000.00, 23000.00, 0.00,
+        0.00, 31000.00, 27000.00, 26500.00, 32000.00
+    };
+
+    calcular_faturamento(faturamento, TAMANHO);
+
+    return 0;
+}
